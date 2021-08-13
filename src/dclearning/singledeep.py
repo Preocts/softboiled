@@ -31,18 +31,13 @@ class SafeLoader:
         return_data: Dict[str, Any] = {}
 
         for field in dataclasses.fields(obj):
+            new_value = data[field.name] if field.name in data else None
+            return_data.update({field.name: new_value})
 
-            if field.name not in data:
-                return_data.update({field.name: None})
-
-                if "Optional" not in field.type:
-                    SafeLoader.log.warning(
-                        "Type Warning: required key missing, now None '%s'", field.name
-                    )
-
-            else:
-
-                return_data.update({field.name: data[field.name]})
+            if new_value is None and "Optional" not in field.type:
+                SafeLoader.log.warning(
+                    "Type Warning: required key missing, now None '%s'", field.name
+                )
 
         return return_data
 
