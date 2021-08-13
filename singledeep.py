@@ -21,8 +21,8 @@ class SafeLoader:
 
 @dataclasses.dataclass
 class SimpleLayer(SafeLoader):
-    data01: str = ""
-    data02: Optional[str] = None
+    data01: str
+    data02: Optional[str]
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> SimpleLayer:

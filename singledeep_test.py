@@ -4,7 +4,9 @@ filters its own parameters on init
 """
 from singledeep import SimpleLayer
 
-TOO_SMALL = {"data01": "This is all"}
+TOO_SMALL = {
+    "data01": "This is all",
+}
 
 JUST_RIGHT = {
     "data01": "This is all",
