@@ -16,7 +16,7 @@ class SafeLoader:
     log = logging.getLogger("SafeLoader")
 
     @staticmethod
-    def cleandata(obj: Type, data: Dict[str, Any]) -> Dict[str, Any]:
+    def cleandata(obj: Type[Any], data: Dict[str, Any]) -> Dict[str, Any]:
         """Cleans data, removing keys that are not supported by object"""
 
         fulldata = SafeLoader.__addmissing(obj, data)
@@ -25,7 +25,7 @@ class SafeLoader:
         return {key: value for key, value in fulldata.items() if key in expected}
 
     @staticmethod
-    def __addmissing(obj: Type, data: Dict[str, Any]) -> Dict[str, Any]:
+    def __addmissing(obj: Type[Any], data: Dict[str, Any]) -> Dict[str, Any]:
         """Adds missing key/values as None. Warns if not optional"""
 
         return_data: Dict[str, Any] = {}

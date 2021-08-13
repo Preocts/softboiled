@@ -2,7 +2,9 @@
 The goal here is to create a single deep dataclass that
 filters its own parameters on init
 """
-from singledeep import SimpleLayer
+from typing import Any
+
+from dclearning.singledeep import SimpleLayer
 
 TOO_SMALL = {
     "data01": "This is all",
@@ -22,7 +24,7 @@ TOO_MUCH = {
 }
 
 
-def test_too_small(caplog) -> None:
+def test_too_small(caplog: Any) -> None:
     """Pass/fail"""
     result = SimpleLayer.from_dict(TOO_SMALL)
 
