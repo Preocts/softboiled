@@ -8,6 +8,7 @@ import dataclasses
 import logging
 from typing import Any
 from typing import Dict
+from typing import NamedTuple
 from typing import Optional
 from typing import Type
 
@@ -73,6 +74,7 @@ class TopLayer(SafeLoader):
     data01: str
     data02: NestedLayer
     data03: Optional[str]
+    data04: Optional[NamedTuple]
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> TopLayer:
@@ -88,3 +90,10 @@ class NestedLayer(SafeLoader):
     def from_dict(cls, data: Dict[str, Any]) -> NestedLayer:
         """create from dict"""
         return cls(**cls.cleandata(NestedLayer, data))
+
+
+class NotDC(NamedTuple):
+    data01: str
+
+
+print(dataclasses.fields(TopLayer))
