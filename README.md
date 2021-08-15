@@ -1,29 +1,67 @@
-# Dataclasses
+# SoftBoiled - Making flexible child dataclasses
 
-Playing around with making simple, but flexible dataclasses for modeling API
-responses.
+### Why
 
-### Challenge
+I started using dataclasses to model API responses.  The self-constructing nature of the dataclass made the task very simple. In addition, having a model and not just a dict of the API response made the working code much cleaner.
 
-While many REST APIs out there are well documented and easily modeled, there
-are a few that break this norm. Their structure is fey and fickle with
-unexpected key/value pairs appearing along side unexpected null values.
+This:
+```json
+{
+  "id": 1,
+  "name": "Some API Response",
+  "details": {
+    "id": 1,
+    "name": "Some details"
+  }
+}
+```
 
-`dataclasses.dataclass` seems to be the best solution for quickly prototyping
-out the model. The only exception is when *more* key/values exist than
-expected.
+Was easy to create as a data model with:
+```py
+import dataclasses
 
-### Proposed Solution
+@dataclasses.dataclass
+class APIResponse:
+    id: int
+    name: str
+    details: APIDetails
 
-Create a parent class that contains utility methods which strip incoming data
-down. Extra keys will not be passed to the `__init__` of the dataclass.
+@dataclasses.dataclass
+class APIDetails:
+    id: int
+    name: str
 
-### Goal One:
+mapped_response = APIResponse(**json_response)
+```
+
+Of course this is vastly simplified. The API schema I started working with here were dozens of key/value pairs long with nested arrays and objects. But the pattern was there and it worked!  The `**` unpacking took care of the parameters and `dataclasses` did all the work.  I could even bring the model back to a dict form with `dataclasses.asdict(mapped_response)`.
+
+The issues started when the API I was working with would add key/value pairs that were not in the official documentation.  Some objects gained key/value data depending on how they'd been used.  It wasn't important information but it broke the model with a single error:
+
+`TypeError: __init__() got an unexpected keyword argument '[keyname]'`
+
+The concept of the solution to this is straight-forward: Scrub your data before you create the dataclass instance.  `dataclasses` even has helper methods to facilitate this with `fields()`. Just remove what isn't expected *before* creating the model. Easy to apply at the top level `APIResponse` in my simple example. But how to apply that cleaning logic at the nested `APIDetails`?
+
+---
+
+### What
+
+The immediate solution seemed to be not to use the built-in `__init__` of the dataclass. Instead, define my own `__init__` which accounted for extra values by ignoring them.  This quickly lead to bulky `__init__` defs in the dataclass definition with duplicated code in each new dataclass model.  There had to be a more programmatic solution.
+
+That lead me to `SoftBoiled`. A parent class that, when inherited by a dataclass, gave me a simple method to create an instance.  The method would take the full dict response from the API, apply the cleaning process to the provided dict, and then use the built-in `__init__` of the dataclass to construct the model.
+
+---
+
+### Goal One [DONE]:
 
 Create methods to be called from a parent class. This requires dataclasses to
 be created using a `sbload()` class method.
 
 ### Goal Two:
+
+Add logic to handle a dataclass target that isn't a child of `SoftBoiled`. If that dataclass doesn't have a `sbload()` method then hand over the key/value parameters normally.
+
+### Goal Three:
 
 Pull `sbload()` out of the dataclass child and into `SoftBoiled`. This will leave the dataclass definition simple and clean.
 
