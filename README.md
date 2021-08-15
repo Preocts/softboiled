@@ -57,7 +57,7 @@ That lead me to `SoftBoiled`. A parent class that, when inherited by a dataclass
 Create methods to be called from a parent class. This requires dataclasses to
 be created using a `sbload()` class method.
 
-### Goal Two:
+### Goal Two [DONE]:
 
 Add logic to handle a dataclass target that isn't a child of `SoftBoiled`. If that dataclass doesn't have a `sbload()` method then hand over the key/value parameters normally.
 
