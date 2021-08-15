@@ -5,8 +5,13 @@ from dclearning.nested import NestedLayer
 from dclearning.nested import TopLayer
 
 INNER_NEST_SMALL = {"data01": "Hi"}
-INNER_NEST = {"data01": "Hi", "data02": True}
-INNER_NEST_LARGE = {"data01": "Hi", "data02": True, "data03": "wut"}
+INNER_NEST = {"data01": "Hi", "data02": True, "data03": {"data01": "Norm"}}
+INNER_NEST_LARGE = {
+    "data01": "Hi",
+    "data02": True,
+    "data03": {"data01": "Norm"},
+    "data04": "wut",
+}
 
 INNER_LIST = [INNER_NEST, INNER_NEST]
 
@@ -72,9 +77,9 @@ def test_too_large() -> None:
     result = TopLayer.sbload(TOO_MUCH)
 
     assert result.data01 == JUST_RIGHT["data01"]
-    assert result.data02 == NestedLayer.sbload(INNER_NEST)
+    assert result.data02 == NestedLayer.sbload(INNER_NEST_LARGE)
     assert result.data03 == JUST_RIGHT["data03"]
     assert result.data04 == [
-        NestedLayer.sbload(INNER_NEST),
-        NestedLayer.sbload(INNER_NEST),
+        NestedLayer.sbload(INNER_NEST_LARGE),
+        NestedLayer.sbload(INNER_NEST_LARGE),
     ]

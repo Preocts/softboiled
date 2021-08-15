@@ -61,13 +61,17 @@ class SoftBoiled:
             for search in ["Optional", "List", "[", "]"]:
                 field_type = field_type.replace(search, "")
 
-            if (field_obj := globals().get(field_type)) is not None:  # type: ignore
+            if fobj := globals().get(field_type):  # type: ignore
+
+                # Find the constructor: if a SoftBoil 'sbload' exists use that
+                # else assume the __init__ can handle the info
+                constr = fobj.sbload if getattr(fobj, "sbload", False) else fobj
 
                 if isinstance(value, list):
-                    values = [field_obj.sbload(inner) for inner in value]
+                    values = [constr(inner) for inner in value]
                     return_data.update({key: values})
                 else:
-                    return_data.update({key: field_obj.sbload(value)})
+                    return_data.update({key: constr(value)})
                 continue
 
             return_data.update({key: value})
@@ -92,6 +96,7 @@ class TopLayer(SoftBoiled):
 class NestedLayer(SoftBoiled):
     data01: Optional[str]
     data02: bool
+    data03: NestedNorm
 
     @classmethod
     def sbload(cls, data: Dict[str, Any]) -> NestedLayer:
@@ -99,13 +104,23 @@ class NestedLayer(SoftBoiled):
         return cls(**cls.cleandata(NestedLayer, data))
 
 
+@dataclasses.dataclass
+class NestedNorm:
+    data01: str = ""
+
+
 if __name__ == "__main__":
 
     INNER_NEST_SMALL = {"data01": "Hi"}
-    INNER_NEST = {"data01": "Hi", "data02": True}
-    INNER_NEST_LARGE = {"data01": "Hi", "data02": True, "data03": "wut"}
+    INNER_NEST = {"data01": "Hi", "data02": True, "data03": {"data01": "Norm"}}
+    INNER_NEST_LARGE = {
+        "data01": "Hi",
+        "data02": True,
+        "data03": {"data01": "Norm"},
+        "data04": "wut",
+    }
 
-    INNER_LIST = [INNER_NEST, INNER_NEST, INNER_NEST]
+    INNER_LIST = [INNER_NEST, INNER_NEST]
 
     JUST_RIGHT: Dict[str, Any] = {
         "data01": "This is all",
