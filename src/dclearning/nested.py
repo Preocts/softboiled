@@ -16,8 +16,6 @@ from typing import Type
 class SafeLoader:
     log = logging.getLogger("SafeLoader")
 
-    SUPPORTED_TYPES = [int, float, str, bool, list, dict, None]
-
     @staticmethod
     def cleandata(obj: Type[Any], data: Dict[str, Any]) -> Dict[str, Any]:
         """Cleans data, removing keys that are not supported by object"""
@@ -59,13 +57,9 @@ class SafeLoader:
         for key, value in data.items():
 
             field_type = fields[key].type
-
-            # Possible nesting includes Optional[] and List[]
-            # Strip these down
-            if field_type.startswith("Optional["):
-                field_type = field_type.lstrip("Optional[").rstrip("]")
-            if field_type.startswith("List["):
-                field_type = field_type.lstrip("List[").rstrip("]")
+            # Possible hinting includes Optional[] and List[] so strip these out
+            for search in ["Optional", "List", "[", "]"]:
+                field_type = field_type.replace(search, "")
 
             if (field_obj := globals().get(field_type)) is not None:  # type: ignore
 
