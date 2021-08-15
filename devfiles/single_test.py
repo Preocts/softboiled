@@ -4,7 +4,7 @@ filters its own parameters on init
 """
 from typing import Any
 
-from dclearning.single import SimpleLayer
+from single import SimpleLayer
 
 TOO_SMALL = {
     "data01": "This is all",

@@ -63,6 +63,10 @@ Add logic to handle a dataclass target that isn't a child of `SoftBoiled`. If th
 
 ### Goal Three:
 
+We need a way to register `SoftBoiled` dataclasses.  The current use of `globals()` to identify a dataclass target does not span across modules in the desired fashion.
+
+### Goal Three:
+
 Pull `sbload()` out of the dataclass child and into `SoftBoiled`. This will leave the dataclass definition simple and clean.
 
 ### Stretch Goal:

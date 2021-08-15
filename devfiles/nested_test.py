@@ -1,8 +1,8 @@
 from typing import Any
 from typing import Dict
 
-from dclearning.nested import NestedLayer
-from dclearning.nested import TopLayer
+from nested import NestedLayer
+from nested import TopLayer
 
 INNER_NEST_SMALL = {"data01": "Hi"}
 INNER_NEST = {"data01": "Hi", "data02": True, "data03": {"data01": "Norm"}}
