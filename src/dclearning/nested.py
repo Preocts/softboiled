@@ -13,8 +13,8 @@ from typing import Optional
 from typing import Type
 
 
-class SafeLoader:
-    log = logging.getLogger("SafeLoader")
+class SoftBoiled:
+    log = logging.getLogger("SoftBoiled")
 
     @staticmethod
     def cleandata(obj: Type[Any], data: Dict[str, Any]) -> Dict[str, Any]:
@@ -24,9 +24,9 @@ class SafeLoader:
 
         cleandata = {key: value for key, value in data.items() if key in expected}
 
-        nesteddata = SafeLoader.__createnested(obj, cleandata)
+        nesteddata = SoftBoiled.__createnested(obj, cleandata)
 
-        fulldata = SafeLoader.__addmissing(obj, nesteddata)
+        fulldata = SoftBoiled.__addmissing(obj, nesteddata)
 
         return fulldata
 
@@ -41,7 +41,7 @@ class SafeLoader:
             return_data.update({field.name: new_value})
 
             if new_value is None and "Optional" not in field.type:
-                SafeLoader.log.warning(
+                SoftBoiled.log.warning(
                     "Type Warning: required key missing, now None '%s'", field.name
                 )
 
@@ -49,7 +49,7 @@ class SafeLoader:
 
     @staticmethod
     def __createnested(obj: Type[Any], data: Dict[str, Any]) -> Dict[str, Any]:
-        """Create nested dataclass objects with from_dict calls"""
+        """Create nested dataclass objects with sbload calls"""
 
         return_data: Dict[str, Any] = {}
         fields = {field.name: field for field in dataclasses.fields(obj)}
@@ -64,10 +64,10 @@ class SafeLoader:
             if (field_obj := globals().get(field_type)) is not None:  # type: ignore
 
                 if isinstance(value, list):
-                    values = [field_obj.from_dict(inner) for inner in value]
+                    values = [field_obj.sbload(inner) for inner in value]
                     return_data.update({key: values})
                 else:
-                    return_data.update({key: field_obj.from_dict(value)})
+                    return_data.update({key: field_obj.sbload(value)})
                 continue
 
             return_data.update({key: value})
@@ -76,25 +76,25 @@ class SafeLoader:
 
 
 @dataclasses.dataclass
-class TopLayer(SafeLoader):
+class TopLayer(SoftBoiled):
     data01: str
     data02: NestedLayer
     data03: Optional[str]
     data04: Optional[List[NestedLayer]]
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> TopLayer:
+    def sbload(cls, data: Dict[str, Any]) -> TopLayer:
         """create from dict"""
         return cls(**cls.cleandata(TopLayer, data))
 
 
 @dataclasses.dataclass
-class NestedLayer(SafeLoader):
+class NestedLayer(SoftBoiled):
     data01: Optional[str]
     data02: bool
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> NestedLayer:
+    def sbload(cls, data: Dict[str, Any]) -> NestedLayer:
         """create from dict"""
         return cls(**cls.cleandata(NestedLayer, data))
 
@@ -127,10 +127,10 @@ if __name__ == "__main__":
     }
 
     print("++ Exact match to expected input:")
-    print(f"\n{TopLayer.from_dict(JUST_RIGHT)}\n")
+    print(f"\n{TopLayer.sbload(JUST_RIGHT)}\n")
 
     print("++ Too much data provided at base and inner layers:")
-    print(f"\n{TopLayer.from_dict(TOO_MUCH)}\n")
+    print(f"\n{TopLayer.sbload(TOO_MUCH)}\n")
 
     print("++ Not enough data provided at base or inner layers:")
-    print(f"\n{TopLayer.from_dict(TOO_SMALL)}\n")
+    print(f"\n{TopLayer.sbload(TOO_SMALL)}\n")

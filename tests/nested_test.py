@@ -32,7 +32,7 @@ TOO_SMALL: Dict[str, Any] = {
 
 def test_too_small_missing_all(caplog: Any) -> None:
     """Pass/fail"""
-    result = TopLayer.from_dict({})
+    result = TopLayer.sbload({})
 
     assert result.data01 is None
 
@@ -41,14 +41,14 @@ def test_too_small_missing_all(caplog: Any) -> None:
 
 def test_too_small_with_nest(caplog: Any) -> None:
     """Pass/fail"""
-    result = TopLayer.from_dict(TOO_SMALL)
+    result = TopLayer.sbload(TOO_SMALL)
 
     assert result.data01 is None
     assert result.data02 is None
     assert result.data03 is None
     assert result.data04 == [
-        NestedLayer.from_dict(INNER_NEST_SMALL),
-        NestedLayer.from_dict(INNER_NEST_SMALL),
+        NestedLayer.sbload(INNER_NEST_SMALL),
+        NestedLayer.sbload(INNER_NEST_SMALL),
     ]
 
     assert "Type Warning: required key missing" in caplog.text
@@ -56,25 +56,25 @@ def test_too_small_with_nest(caplog: Any) -> None:
 
 def test_just_right() -> None:
     """Pass/fail"""
-    result = TopLayer.from_dict(JUST_RIGHT)
+    result = TopLayer.sbload(JUST_RIGHT)
 
     assert result.data01 == JUST_RIGHT["data01"]
-    assert result.data02 == NestedLayer.from_dict(INNER_NEST)
+    assert result.data02 == NestedLayer.sbload(INNER_NEST)
     assert result.data03 == JUST_RIGHT["data03"]
     assert result.data04 == [
-        NestedLayer.from_dict(INNER_NEST),
-        NestedLayer.from_dict(INNER_NEST),
+        NestedLayer.sbload(INNER_NEST),
+        NestedLayer.sbload(INNER_NEST),
     ]
 
 
 def test_too_large() -> None:
     """Pass/fail"""
-    result = TopLayer.from_dict(TOO_MUCH)
+    result = TopLayer.sbload(TOO_MUCH)
 
     assert result.data01 == JUST_RIGHT["data01"]
-    assert result.data02 == NestedLayer.from_dict(INNER_NEST)
+    assert result.data02 == NestedLayer.sbload(INNER_NEST)
     assert result.data03 == JUST_RIGHT["data03"]
     assert result.data04 == [
-        NestedLayer.from_dict(INNER_NEST),
-        NestedLayer.from_dict(INNER_NEST),
+        NestedLayer.sbload(INNER_NEST),
+        NestedLayer.sbload(INNER_NEST),
     ]
