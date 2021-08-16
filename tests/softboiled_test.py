@@ -62,6 +62,7 @@ class NestedLayer:
     data03: NestedNorm
 
 
+@SoftBoiled
 @dataclasses.dataclass
 class NestedNorm:
     data01: str = ""
