@@ -6,11 +6,17 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
-from softboiled import SoftBoiled
+from softboiled.softboiled import SoftBoiled
 
-INNER_NEST_SMALL = {"data01": "Hi"}
-INNER_NEST = {"data01": "Hi", "data02": True, "data03": {"data01": "Norm"}}
-INNER_NEST_LARGE = {
+# from softboiled import SoftBoiled
+
+INNER_NEST_SMALL: Dict[str, Any] = {"data01": "Hi"}
+INNER_NEST: Dict[str, Any] = {
+    "data01": "Hi",
+    "data02": True,
+    "data03": {"data01": "Norm"},
+}
+INNER_NEST_LARGE: Dict[str, Any] = {
     "data01": "Hi",
     "data02": True,
     "data03": {"data01": "Norm"},
@@ -20,48 +26,40 @@ INNER_NEST_LARGE = {
 INNER_LIST = [INNER_NEST, INNER_NEST]
 
 JUST_RIGHT: Dict[str, Any] = {
-    "data01": "This is all",
-    "data02": INNER_NEST,
-    "data03": "Why are you still here",
-    "data04": INNER_LIST,
+    "tdata01": "This is all",
+    "tdata02": INNER_NEST,
+    "tdata03": "Why are you still here",
+    "tdata04": INNER_LIST,
 }
 
 TOO_MUCH: Dict[str, Any] = {
-    "data01": "This is all",
-    "data02": INNER_NEST,
-    "data03": "Why are you still here",
-    "data04": [INNER_NEST_LARGE, INNER_NEST_LARGE],
-    "data05": "wut",
+    "tdata01": "This is all",
+    "tdata02": INNER_NEST,
+    "tdata03": "Why are you still here",
+    "tdata04": [INNER_NEST_LARGE, INNER_NEST_LARGE],
+    "tdata05": "wut",
 }
 
 TOO_SMALL: Dict[str, Any] = {
-    "data04": [INNER_NEST_SMALL, INNER_NEST_SMALL],
+    "tdata04": [INNER_NEST_SMALL, INNER_NEST_SMALL],
 }
 
 
+@SoftBoiled
 @dataclasses.dataclass
-class TopLayer(SoftBoiled):
-    data01: str
-    data02: NestedLayer
-    data03: Optional[str]
-    data04: Optional[List[NestedLayer]]
-
-    @classmethod
-    def sbload(cls, data: Dict[str, Any]) -> TopLayer:
-        """create from dict"""
-        return cls(**cls.cleandata(TopLayer, data))
+class TopLayer:
+    tdata01: str
+    tdata02: NestedLayer
+    tdata03: Optional[str]
+    tdata04: Optional[List[NestedLayer]]
 
 
+@SoftBoiled
 @dataclasses.dataclass
-class NestedLayer(SoftBoiled):
+class NestedLayer:
     data01: Optional[str]
     data02: bool
     data03: NestedNorm
-
-    @classmethod
-    def sbload(cls, data: Dict[str, Any]) -> NestedLayer:
-        """create from dict"""
-        return cls(**cls.cleandata(NestedLayer, data))
 
 
 @dataclasses.dataclass
@@ -69,25 +67,32 @@ class NestedNorm:
     data01: str = ""
 
 
+def test_registered() -> None:
+    _ = TopLayer(**JUST_RIGHT)
+
+    assert "TopLayer" in SoftBoiled.platter
+    assert "NestedLayer" in SoftBoiled.platter
+
+
 def test_too_small_missing_all(caplog: Any) -> None:
     """Pass/fail"""
-    result = TopLayer.sbload({})
+    result = TopLayer()  # type: ignore
 
-    assert result.data01 is None
+    assert result.tdata01 is None
 
     assert "Type Warning: required key missing" in caplog.text
 
 
 def test_too_small_with_nest(caplog: Any) -> None:
     """Pass/fail"""
-    result = TopLayer.sbload(TOO_SMALL)
+    result = TopLayer(**TOO_SMALL)
 
-    assert result.data01 is None
-    assert result.data02 is None
-    assert result.data03 is None
-    assert result.data04 == [
-        NestedLayer.sbload(INNER_NEST_SMALL),
-        NestedLayer.sbload(INNER_NEST_SMALL),
+    assert result.tdata01 is None
+    assert result.tdata02 is None
+    assert result.tdata03 is None
+    assert result.tdata04 == [
+        NestedLayer(**INNER_NEST_SMALL),
+        NestedLayer(**INNER_NEST_SMALL),
     ]
 
     assert "Type Warning: required key missing" in caplog.text
@@ -95,25 +100,25 @@ def test_too_small_with_nest(caplog: Any) -> None:
 
 def test_just_right() -> None:
     """Pass/fail"""
-    result = TopLayer.sbload(JUST_RIGHT)
+    result = TopLayer(**JUST_RIGHT)
 
-    assert result.data01 == JUST_RIGHT["data01"]
-    assert result.data02 == NestedLayer.sbload(INNER_NEST)
-    assert result.data03 == JUST_RIGHT["data03"]
-    assert result.data04 == [
-        NestedLayer.sbload(INNER_NEST),
-        NestedLayer.sbload(INNER_NEST),
+    assert result.tdata01 == JUST_RIGHT["data01"]
+    assert result.tdata02 == NestedLayer(**INNER_NEST)
+    assert result.tdata03 == JUST_RIGHT["data03"]
+    assert result.tdata04 == [
+        NestedLayer(**INNER_NEST),
+        NestedLayer(**INNER_NEST),
     ]
 
 
 def test_too_large() -> None:
     """Pass/fail"""
-    result = TopLayer.sbload(TOO_MUCH)
+    result = TopLayer(**TOO_MUCH)
 
-    assert result.data01 == JUST_RIGHT["data01"]
-    assert result.data02 == NestedLayer.sbload(INNER_NEST_LARGE)
-    assert result.data03 == JUST_RIGHT["data03"]
-    assert result.data04 == [
-        NestedLayer.sbload(INNER_NEST_LARGE),
-        NestedLayer.sbload(INNER_NEST_LARGE),
+    assert result.tdata01 == JUST_RIGHT["data01"]
+    assert result.tdata02 == NestedLayer(**INNER_NEST_LARGE)
+    assert result.tdata03 == JUST_RIGHT["data03"]
+    assert result.tdata04 == [
+        NestedLayer(**INNER_NEST_LARGE),
+        NestedLayer(**INNER_NEST_LARGE),
     ]
