@@ -9,8 +9,6 @@ import functools
 import logging
 from typing import Any
 from typing import Dict
-from typing import List
-from typing import Optional
 from typing import Type
 
 
@@ -80,75 +78,15 @@ class SoftBoiled:
                 constr = SoftBoiled.platter[field_type]
 
                 if isinstance(value, list):
-                    values = [constr(**inner) for inner in value]
+                    values = [SoftBoiled.cleandata(constr, inner) for inner in value]
+                    values = [constr(**inner) for inner in values]
                     return_data.update({key: values})
                 else:
-                    return_data.update({key: constr(**value)})
+                    return_data.update(
+                        {key: constr(**SoftBoiled.cleandata(constr, value))}
+                    )
                 continue
 
             return_data.update({key: value})
 
         return return_data
-
-
-INNER_NEST_SMALL: Dict[str, Any] = {"data01": "Hi"}
-INNER_NEST: Dict[str, Any] = {
-    "data01": "Hi",
-    "data02": True,
-    "data03": {"data01": "Norm"},
-}
-INNER_NEST_LARGE: Dict[str, Any] = {
-    "data01": "Hi",
-    "data02": True,
-    "data03": {"data01": "Norm"},
-    "data04": "wut",
-}
-
-INNER_LIST = [INNER_NEST, INNER_NEST]
-
-JUST_RIGHT: Dict[str, Any] = {
-    "data01": "This is all",
-    "data02": INNER_NEST,
-    "data03": "Why are you still here",
-    "data04": INNER_LIST,
-}
-
-TOO_MUCH: Dict[str, Any] = {
-    "data01": "This is all",
-    "data02": INNER_NEST,
-    "data03": "Why are you still here",
-    "data04": [INNER_NEST_LARGE, INNER_NEST_LARGE],
-    "data05": "wut",
-}
-
-TOO_SMALL: Dict[str, Any] = {
-    "data04": [INNER_NEST_SMALL, INNER_NEST_SMALL],
-}
-
-
-@SoftBoiled
-@dataclasses.dataclass
-class TopLayer:
-    data01: str
-    data02: NestedLayer
-    data03: Optional[str]
-    data04: Optional[List[NestedLayer]]
-
-
-@SoftBoiled
-@dataclasses.dataclass
-class NestedLayer:
-    data01: Optional[str]
-    data02: bool
-    data03: NestedNorm
-
-
-@dataclasses.dataclass
-class NestedNorm:
-    data01: str = ""
-
-
-if __name__ == "__main__":
-    result = TopLayer(**JUST_RIGHT)
-    print("&" * 79)
-    print(result)

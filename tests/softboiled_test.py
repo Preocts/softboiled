@@ -102,9 +102,9 @@ def test_just_right() -> None:
     """Pass/fail"""
     result = TopLayer(**JUST_RIGHT)
 
-    assert result.tdata01 == JUST_RIGHT["data01"]
+    assert result.tdata01 == JUST_RIGHT["tdata01"]
     assert result.tdata02 == NestedLayer(**INNER_NEST)
-    assert result.tdata03 == JUST_RIGHT["data03"]
+    assert result.tdata03 == JUST_RIGHT["tdata03"]
     assert result.tdata04 == [
         NestedLayer(**INNER_NEST),
         NestedLayer(**INNER_NEST),
@@ -115,9 +115,9 @@ def test_too_large() -> None:
     """Pass/fail"""
     result = TopLayer(**TOO_MUCH)
 
-    assert result.tdata01 == JUST_RIGHT["data01"]
+    assert result.tdata01 == JUST_RIGHT["tdata01"]
     assert result.tdata02 == NestedLayer(**INNER_NEST_LARGE)
-    assert result.tdata03 == JUST_RIGHT["data03"]
+    assert result.tdata03 == JUST_RIGHT["tdata03"]
     assert result.tdata04 == [
         NestedLayer(**INNER_NEST_LARGE),
         NestedLayer(**INNER_NEST_LARGE),
