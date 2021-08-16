@@ -1,6 +1,131 @@
-# SoftBoiled - Making flexible child dataclasses
+# SoftBoiled - Making overly flexible dataclasses
 
-### Why
+A dataclass decorator that cleans the parameters on instance creation to account for missing or extra keyword arguments. Allows for faster, if messier, modeling of API responses that are lacking in firm schema.
+
+## Requirements
+- Python >= 3.8
+
+## Installation
+
+Installation
+**Note**: Replace `v1.0.0` with the desired version number or `main` for latest (unstable) version
+
+Install via pip:
+```
+# Linux/MacOS
+python3 -m pip install git+https://github.com/preocts/softboiled@v1.0.0
+
+# Windows
+py -m pip install git+https://github.com/preocts/softboiled@v1.0.0
+```
+
+---
+
+## Known Limitations
+
+- All dataclass objects within a SoftBoiled dataclass must also be SoftBoiled
+- No default values defined in the dataclass are honored
+---
+
+## [Example Usage](example/example.py)
+
+The documentation says to expect the following API response:
+```py
+EXAMPLE01 = {
+  "id": 1,
+  "name": "Example Response v1",
+  "details": {
+    "color": "blue",
+    "number": 42,
+    "true": False
+  },
+  "more": False
+}
+```
+
+However, the API response is actually:
+```py
+EXAMPLE02 = {
+  "id": 1,
+  "name": "Example Response v1",
+  "status": "depreciated",
+  "details": {
+    "color": "blue",
+    "number": 42,
+    "size": "medium"
+  },
+  "more": False
+}
+```
+
+The additional field `status` and missing field `details.true` are not consistant in *all* of the API responses and cannot be safely mapped.  Time for a `Softboiled` dataclass:
+
+```py
+from __future__ import annotations
+
+import dataclasses
+
+from softboiled import SoftBoiled
+
+
+@SoftBoiled
+@dataclasses.dataclass
+class ExampleAPIModel:
+    id: int
+    name: str
+    details: ExampleAPISubModel
+    more: bool
+
+
+@SoftBoiled
+@dataclasses.dataclass
+class ExampleAPISubModel:
+    color: str
+    number: int
+    true: bool
+    size: str
+
+
+EXAMPLE01 = {
+    "id": 1,
+    "name": "Example Response v1",
+    "details": {"color": "blue", "number": 42, "true": False},
+    "more": False,
+}
+
+EXAMPLE02 = {
+    "id": 1,
+    "name": "Example Response v1",
+    "status": "depreciated",
+    "details": {"color": "blue", "number": 42, "size": "medium"},
+    "more": False,
+}
+
+valid_model01 = ExampleAPIModel(**EXAMPLE01)
+valid_model02 = ExampleAPIModel(**EXAMPLE02)
+
+print(valid_model01)
+print(valid_model02)
+```
+
+Output:
+```
+Type Warning: required key missing, now None 'size'
+Type Warning: required key missing, now None 'true'
+ExampleAPIModel(id=1, name='Example Response v1', details=ExampleAPISubModel(color='blue', number=42, true=False, size=None), more=False)
+ExampleAPIModel(id=1, name='Example Response v1', details=ExampleAPISubModel(color='blue', number=42, true=None, size='medium'), more=False)
+```
+
+Both models will be created without errors. The extra field `status` will be dropped and the missing field `details.true` will be created with a `NoneType` value for `valid_model02`.
+
+The `Type Warning` is indicating that a value was missing and replaced with `None`.  Type-hinting the key as optional (`size: Optional[str]`) eliminates the warning.  Not importing `annotations` will also remove warnings.
+
+---
+---
+
+### Why:
+
+Because data isn't perfect.
 
 I started using dataclasses to model API responses.  The self-constructing nature of the dataclass made the task very simple. In addition, having a model and not just a dict of the API response made the working code much cleaner.
 
@@ -42,100 +167,79 @@ The issues started when the API I was working with would add key/value pairs tha
 
 The concept of the solution to this is straight-forward: Scrub your data before you create the dataclass instance.  `dataclasses` even has helper methods to facilitate this with `fields()`. Just remove what isn't expected *before* creating the model. Easy to apply at the top level `APIResponse` in my simple example. But how to apply that cleaning logic at the nested `APIDetails`?
 
----
-
-### What
-
 The immediate solution seemed to be not to use the built-in `__init__` of the dataclass. Instead, define my own `__init__` which accounted for extra values by ignoring them.  This quickly lead to bulky `__init__` defs in the dataclass definition with duplicated code in each new dataclass model.  There had to be a more programmatic solution.
 
-That lead me to `SoftBoiled`. A parent class that, when inherited by a dataclass, gave me a simple method to create an instance.  The method would take the full dict response from the API, apply the cleaning process to the provided dict, and then use the built-in `__init__` of the dataclass to construct the model.
+That lead me to `SoftBoiled`. A decorater for dataclasses. Once wrapped, the dataclass has the incoming key/value data scrubbed. Extra pairs are removed to avoid the `TypeError`. Missing pairs are added with a value of `None`. Nested Dataclasses are treated with the same care.
+
+This leaves creating the model as simple as defining the structure of the dataclass and then unpacking an API's JSON response into it.
 
 ---
-
-### Goal One [DONE]:
-
-Create methods to be called from a parent class. This requires dataclasses to
-be created using a `sbload()` class method.
-
-### Goal Two [DONE]:
-
-Add logic to handle a dataclass target that isn't a child of `SoftBoiled`. If that dataclass doesn't have a `sbload()` method then hand over the key/value parameters normally.
-
-### Goal Three:
-
-We need a way to register `SoftBoiled` dataclasses.  The current use of `globals()` to identify a dataclass target does not span across modules in the desired fashion.
-
-### Goal Three:
-
-Pull `sbload()` out of the dataclass child and into `SoftBoiled`. This will leave the dataclass definition simple and clean.
-
-### Stretch Goal:
-
-Create a wrapper around the dataclass decorator, intercepting the parameters
-before the `__init__` is called. This will allow a class to be initialized from
-the `ClassName(...)` without a classmethod.
-
 ---
 
-## Simple Start - single layer dataclass
+## Local developer installation
 
-With a single layer dataclass accomplish the following:
-- Loads without error when missing fields
-- Loads without error when fields match
-- Loads without error when too many fields
-- Alerts via logging if missing fields (inserted as `None`) are not `Optional` types
+It is **highly** recommended to use a `venv` for installation. Leveraging a `venv` will ensure the installed dependency files will not impact other python projects.
 
-```py
-@dataclasses.dataclass
-class SimpleLayer(SafeLoader):
-    data01: str
-    data02: str
-    data03: Optional[str]
+Clone this repo and enter root directory of repo:
+```bash
+$ git clone https://github.com/preocts/softboiled
+$ cd softboiled
+```
 
-    @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> SimpleLayer:
-        """create from dict"""
-        return cls(**cls.cleandata(SimpleLayer, data))
+Create and activate `venv`:
+```bash
+# Linux/MacOS
+python3 -m venv venv
+. venv/bin/activate
+
+# Windows
+python -m venv venv
+venv\Scripts\activate.bat
+# or
+py -m venv venv
+venv\Scripts\activate.bat
+```
+
+Your command prompt should now have a `(venv)` prefix on it.
+
+Install editable library and development requirements:
+```bash
+# Linux/MacOS
+pip install -r requirements-dev.txt
+pip install --editable .
+
+# Windows
+python -m pip install -r requirements-dev.txt
+python -m pip install --editable .
+# or
+py -m pip install -r requirements-dev.txt
+py -m pip install --editable .
+```
+
+Install pre-commit hooks to local repo:
+```bash
+pre-commit install
+pre-commit autoupdate
+```
+
+Run tests
+```bash
+tox
+```
+
+To exit the `venv`:
+```bash
+deactivate
 ```
 
 ---
 
-## Nested Complexity - Dataclasses containing dataclasses
+### Makefile
 
-With a nested structure, which is far more likely with response models, there are a few more challenges to overcome.
-- Accomplish every step of Simple Start
-- Identify the type of the target key in the dataclass
-  - Account for `Optional[]` and and `List[]` nestings of types
-  - If the type is class
-    - and the class is a dataclass
-    - and the dataclass has a `sbload` method
-    - call the `sbload` method (see note about arrays)
-    - update the original value with the new instance
-  - Else, keep original value
+This repo has a Makefile with some quality of life scripts if your system supports `make`.
 
-*Note on arrays*: It is common to have an array of objects in an API schema. The loading method must also take this into account and create an array of dataclasses when nessecary.
-
-```py
-@dataclasses.dataclass
-class TopLayer(SoftBoiled):
-    data01: str
-    data02: NestedLayer
-    data03: Optional[str]
-    data04: Optional[List[NestedLayer]]
-
-    @classmethod
-    def sbload(cls, data: Dict[str, Any]) -> TopLayer:
-        """create from dict"""
-        return cls(**cls.cleandata(TopLayer, data))
-
-
-@dataclasses.dataclass
-class NestedLayer(SoftBoiled):
-    data01: Optional[str]
-    data02: bool
-
-    @classmethod
-    def sbload(cls, data: Dict[str, Any]) -> NestedLayer:
-        """create from dict"""
-        return cls(**cls.cleandata(NestedLayer, data))
-```
+- `install` : Clean all artifacts, update pip, install requirements with no updates
+- `update` : Clean all artifacts, update pip, update requirements, install everything
+- `clean-pyc` : Deletes python/mypy artifacts
+- `clean-tests` : Deletes tox, coverage, and pytest artifacts
+- `build-dist` : Build source distribution and wheel distribution
