@@ -6,9 +6,7 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
-from softboiled.softboiled import SoftBoiled
-
-# from softboiled import SoftBoiled
+from softboiled import SoftBoiled
 
 INNER_NEST_SMALL: Dict[str, Any] = {"data01": "Hi"}
 INNER_NEST: Dict[str, Any] = {
