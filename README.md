@@ -13,9 +13,14 @@ A dataclass decorator that cleans the parameters on instance creation to account
 ## Installation
 
 Installation
-**Note**: Replace `v1.0.0` with the desired version number or `main` for latest (unstable) version
+**Note**: Replace `1.0.0` with the desired version number or `main` for latest (unstable) version
 
-Install via pip:
+Install via pip with pypi:
+```
+pip install softboiled==1.0.0
+```
+
+Install via pip with GitHub:
 ```
 # Linux/MacOS
 python3 -m pip install git+https://github.com/preocts/softboiled@v1.0.0
