@@ -1,6 +1,11 @@
 """
-The goal here is to create a nested dataclass that
-filters its own parameters on init
+Dataclass decorator that cleans creation parameters
+
+A dataclass decorator that cleans the parameters on instance creation
+to account for missing or extra keyword arguments. Allows for faster,
+if messier, modeling of API responses that are lacking in firm schema.
+
+Author: Preocts, discord: Preocts#8196
 """
 from __future__ import annotations
 
@@ -13,10 +18,13 @@ from typing import Type
 
 
 class SoftBoiled:
+    """Dataclass decorator that cleans creation parameters"""
+
     log = logging.getLogger("SoftBoiled")
     platter: Dict[str, Any] = {}
 
     def __init__(self, cls: Type[Any]) -> None:
+        """Wraps a dataclasses.dataclass and registers class name internally"""
         self.cls = cls
 
         SoftBoiled.platter.update({cls.__name__: cls})
@@ -24,14 +32,22 @@ class SoftBoiled:
         functools.update_wrapper(self, cls)
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        """Handles cleaning kwargs before creating dataclass"""
         return self.cls(*args, **SoftBoiled.cleandata(self.cls, kwargs))
 
     def __repr__(self) -> str:
+        """Identify has the decorated class"""
         return repr(self.cls)
 
     @staticmethod
     def cleandata(obj: Type[Any], data: Dict[str, Any]) -> Dict[str, Any]:
-        """Cleans data, removing keys that are not supported by object"""
+        """
+        Cleans data, removing keys that are not supported by object
+
+        Args:
+            obj: The class object that has been decorated
+            data: kwargs of the creation call for the decorated class
+        """
 
         expected = [field.name for field in dataclasses.fields(obj)]
 
@@ -45,7 +61,13 @@ class SoftBoiled:
 
     @staticmethod
     def __addmissing(obj: Type[Any], data: Dict[str, Any]) -> Dict[str, Any]:
-        """Adds missing key/values as None. Warns if not optional"""
+        """
+        Adds missing key/values as None. Warning to console if not optional
+
+        Args:
+            obj: The class object that has been decorated
+            data: kwargs of the creation call for the decorated class
+        """
 
         return_data: Dict[str, Any] = {}
 
@@ -62,15 +84,23 @@ class SoftBoiled:
 
     @staticmethod
     def __createnested(obj: Type[Any], data: Dict[str, Any]) -> Dict[str, Any]:
-        """Create nested dataclass objects with sbload calls"""
+        """
+        Create nested dataclass objects with sbload calls
+
+        Args:
+            obj: The class object that has been decorated
+            data: kwargs of the creation call for the decorated class
+        """
 
         return_data: Dict[str, Any] = {}
         fields = {field.name: field for field in dataclasses.fields(obj)}
 
         for key, value in data.items():
 
-            field_type = str(fields[key].type)
+            finaldata: Any = value
+
             # Possible hinting includes Optional[] and List[] so strip these out
+            field_type = str(fields[key].type)
             for search in ["Optional", "List", "[", "]"]:
                 field_type = field_type.replace(search, "")
 
@@ -78,15 +108,11 @@ class SoftBoiled:
                 constr = SoftBoiled.platter[field_type]
 
                 if isinstance(value, list):
-                    values = [SoftBoiled.cleandata(constr, inner) for inner in value]
-                    values = [constr(**inner) for inner in values]
-                    return_data.update({key: values})
+                    cleandata = [SoftBoiled.cleandata(constr, inner) for inner in value]
+                    finaldata = [constr(**inner) for inner in cleandata]
                 else:
-                    return_data.update(
-                        {key: constr(**SoftBoiled.cleandata(constr, value))}
-                    )
-                continue
+                    finaldata = constr(**SoftBoiled.cleandata(constr, value))
 
-            return_data.update({key: value})
+            return_data.update({key: finaldata})
 
         return return_data

@@ -1,3 +1,8 @@
+"""
+Tests for ./softboiled/softboiled.py
+
+Author: Preocts, discord: Preocts#8196
+"""
 from __future__ import annotations
 
 import dataclasses
