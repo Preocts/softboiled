@@ -12,6 +12,7 @@ from __future__ import annotations
 import dataclasses
 import functools
 import logging
+from dataclasses import MISSING
 from typing import Any
 from typing import Dict
 from typing import Type
@@ -68,11 +69,15 @@ class SoftBoiled:
             obj: The class object that has been decorated
             data: kwargs of the creation call for the decorated class
         """
-
         return_data: Dict[str, Any] = {}
 
         for field in dataclasses.fields(obj):
-            new_value = data[field.name] if field.name in data else None
+
+            if field.name in data:
+                new_value = data[field.name]
+            else:
+                new_value = field.default if field.default is not MISSING else None
+
             return_data.update({field.name: new_value})
 
             if new_value is None and "Optional" not in field.type:

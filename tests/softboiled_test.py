@@ -71,6 +71,21 @@ class NestedNorm:
     data01: str = ""
 
 
+DEFAULT_EXPECTED: Dict[str, Any] = {
+    "data01": "Test 01",
+    "data02": True,
+    "data03": 0,
+}
+
+
+@SoftBoiled
+@dataclasses.dataclass
+class DefaultValues:
+    data01: str = DEFAULT_EXPECTED["data01"]
+    data02: bool = DEFAULT_EXPECTED["data02"]
+    data03: int = DEFAULT_EXPECTED["data03"]
+
+
 def test_registered() -> None:
     _ = TopLayer(**JUST_RIGHT)
 
@@ -126,3 +141,21 @@ def test_too_large() -> None:
         NestedLayer(**INNER_NEST_LARGE),
         NestedLayer(**INNER_NEST_LARGE),
     ]
+
+
+def test_default_values() -> None:
+    """Pass/Fail"""
+    result = DefaultValues()
+
+    assert result.data01 == DEFAULT_EXPECTED["data01"]
+    assert result.data02 == DEFAULT_EXPECTED["data02"]
+    assert result.data03 == DEFAULT_EXPECTED["data03"]
+
+
+def test_set_values_over_default() -> None:
+    """Pass/fail"""
+    result = DefaultValues(data01="Hello", data02=False, data03=10)
+
+    assert result.data01 == "Hello"
+    assert result.data02 is False
+    assert result.data03 == 10
