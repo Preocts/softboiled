@@ -34,7 +34,7 @@ py -m pip install git+https://github.com/preocts/softboiled@v1.0.0
 ## Known Limitations
 
 - All dataclass objects within a SoftBoiled dataclass must also be SoftBoiled
-- No default values defined in the dataclass are honored
+
 ---
 
 ## [Example Usage](example/example.py)
@@ -128,7 +128,8 @@ ExampleAPIModel(id=1, name='Example Response v1', details=ExampleAPISubModel(col
 
 Both models will be created without errors. The extra field `status` will be dropped and the missing field `details.true` will be created with a `NoneType` value for `valid_model02`.
 
-The `Type Warning` is indicating that a value was missing and replaced with `None`.  Type-hinting the key as optional (`size: Optional[str]`) eliminates the warning.  Not importing `annotations` will also remove warnings.
+The `Type Warning` is indicating that a value was missing and replaced with `None`.  Type-hinting the key as optional (`size: Optional[str]`) eliminates the warning.  Giving the attribute a default assignment in the dataclass will also remove the warning as the default will be used.
+
 
 ---
 ---
@@ -179,7 +180,7 @@ The concept of the solution to this is straight-forward: Scrub your data before 
 
 The immediate solution seemed to be not to use the built-in `__init__` of the dataclass. Instead, define my own `__init__` which accounted for extra values by ignoring them.  This quickly lead to bulky `__init__` defs in the dataclass definition with duplicated code in each new dataclass model.  There had to be a more programmatic solution.
 
-That lead me to `SoftBoiled`. A decorater for dataclasses. Once wrapped, the dataclass has the incoming key/value data scrubbed. Extra pairs are removed to avoid the `TypeError`. Missing pairs are added with a value of `None`. Nested Dataclasses are treated with the same care.
+That lead me to `SoftBoiled`. A decorater for dataclasses. Once wrapped, the dataclass has the incoming key/value data scrubbed. Extra pairs are removed to avoid the `TypeError`. Missing pairs are added with a value of `None`, if they don't have a default assignment. Nested Dataclasses are treated with the same care.
 
 This leaves creating the model as simple as defining the structure of the dataclass and then unpacking an API's JSON response into it.
 
@@ -188,7 +189,7 @@ This leaves creating the model as simple as defining the structure of the datacl
 
 ## Local developer installation
 
-It is **highly** recommended to use a `venv` for installation. Leveraging a `venv` will ensure the installed dependency files will not impact other python projects.
+It is **highly** recommended to use a [virtual environment](https://docs.python.org/3/library/venv.html) (`venv`) for installation. Leveraging a `venv` will ensure the installed dependency files will not impact other python projects.
 
 Clone this repo and enter root directory of repo:
 ```bash
