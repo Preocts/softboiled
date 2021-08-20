@@ -28,18 +28,6 @@ from typing import List
 from softboiled import SoftBoiled
 
 
-# Define data models. Not importing __future__ here so inner
-# data models need to be defined before outter
-@SoftBoiled
-@dataclasses.dataclass
-class PagerdutyTeam:
-    """Create the inner-model for acceptance criteria"""
-
-    id: str
-    name: str
-    default_role: str
-
-
 @SoftBoiled
 @dataclasses.dataclass
 class PagerdutyUser:
@@ -53,6 +41,16 @@ class PagerdutyUser:
     id: str
     role: str
     teams: List[PagerdutyTeam]
+
+
+@SoftBoiled
+@dataclasses.dataclass
+class PagerdutyTeam:
+    """Create the inner-model for acceptance criteria"""
+
+    id: str
+    name: str
+    default_role: str
 
 
 def pagerduty_get_object(route: str) -> Dict[str, Any]:
