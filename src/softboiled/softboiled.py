@@ -32,9 +32,9 @@ class SoftBoiled:
 
         functools.update_wrapper(self, cls)
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+    def __call__(self__, *args: Any, **kwargs: Any) -> Any:
         """Handles cleaning kwargs before creating dataclass"""
-        return self.cls(*args, **SoftBoiled.cleandata(self.cls, kwargs))
+        return self__.cls(*args, **SoftBoiled.cleandata(self__.cls, kwargs))
 
     def __repr__(self) -> str:
         """Identify has the decorated class"""
