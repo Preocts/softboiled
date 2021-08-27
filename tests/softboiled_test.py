@@ -3,8 +3,6 @@ Tests for ./softboiled/softboiled.py
 
 Author: Preocts, discord: Preocts#8196
 """
-from __future__ import annotations
-
 import dataclasses
 from typing import Any
 from typing import Dict
@@ -52,9 +50,9 @@ TOO_SMALL: Dict[str, Any] = {
 @dataclasses.dataclass
 class TopLayer:
     tdata01: str
-    tdata02: NestedLayer
+    tdata02: "NestedLayer"
     tdata03: Optional[str]
-    tdata04: Optional[List[NestedLayer]]
+    tdata04: Optional[List["NestedLayer"]]
 
 
 @SoftBoiled
@@ -62,7 +60,7 @@ class TopLayer:
 class NestedLayer:
     data01: Optional[str]
     data02: bool
-    data03: NestedNorm
+    data03: "NestedNorm"
 
 
 @SoftBoiled

@@ -7,11 +7,10 @@ if messier, modeling of API responses that are lacking in firm schema.
 
 Author: Preocts, discord: Preocts#8196
 """
-from __future__ import annotations
-
 import dataclasses
 import functools
 import logging
+import re
 from dataclasses import MISSING
 from typing import Any
 from typing import Dict
@@ -80,7 +79,7 @@ class SoftBoiled:
 
             return_data.update({field.name: new_value})
 
-            if new_value is None and "Optional" not in field.type:
+            if new_value is None and "Optional" not in str(field.type):
                 SoftBoiled.log.warning(
                     "Type Warning: required key missing, now None '%s'", field.name
                 )
@@ -104,19 +103,19 @@ class SoftBoiled:
 
             finaldata: Any = value
 
-            # Possible hinting includes Optional[] and List[] so strip these out
-            field_type = str(fields[key].type)
-            for search in ["Optional", "List", "[", "]"]:
-                field_type = field_type.replace(search, "")
+            for softboiled in SoftBoiled.platter:
+                # Find the SoftBoiled class name in the type string
+                match = re.findall(fr"\b{softboiled}\b", str(fields[key].type))
 
-            if field_type in SoftBoiled.platter:
-                constr = SoftBoiled.platter[field_type]
+                if match:
 
-                if isinstance(value, list):
-                    cleandata = [SoftBoiled.cleandata(constr, inner) for inner in value]
-                    finaldata = [constr(**inner) for inner in cleandata]
-                else:
-                    finaldata = constr(**SoftBoiled.cleandata(constr, value))
+                    constr = SoftBoiled.platter[match[0]]
+
+                    if isinstance(value, list):
+                        cleandata = [SoftBoiled.cleandata(constr, val) for val in value]
+                        finaldata = [constr(**inner) for inner in cleandata]
+                    else:
+                        finaldata = constr(**SoftBoiled.cleandata(constr, value))
 
             return_data.update({key: finaldata})
 

@@ -16,8 +16,6 @@ Required data points:
     - User's team name
     - Team default role
 """
-from __future__ import annotations
-
 import dataclasses
 import http.client
 import json
@@ -26,6 +24,16 @@ from typing import Dict
 from typing import List
 
 from softboiled import SoftBoiled
+
+
+@SoftBoiled
+@dataclasses.dataclass
+class PagerdutyTeam:
+    """Create the inner-model for acceptance criteria"""
+
+    id: str
+    name: str
+    default_role: str
 
 
 @SoftBoiled
@@ -41,16 +49,6 @@ class PagerdutyUser:
     id: str
     role: str
     teams: List[PagerdutyTeam]
-
-
-@SoftBoiled
-@dataclasses.dataclass
-class PagerdutyTeam:
-    """Create the inner-model for acceptance criteria"""
-
-    id: str
-    name: str
-    default_role: str
 
 
 def pagerduty_get_object(route: str) -> Dict[str, Any]:
