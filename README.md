@@ -33,7 +33,6 @@ py -m pip install git+https://github.com/preocts/softboiled@v1.x.x
 
 ## Known Limitations
 
-- `from __future__ import annotations` is required to properly create nested SoftBoiled objects
 - All dataclass objects within a SoftBoiled dataclass must also be SoftBoiled
 
 ---
