@@ -2,6 +2,7 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Preocts/softboiled/main.svg)](https://results.pre-commit.ci/latest/github/Preocts/softboiled/main)
 [![Python package](https://github.com/Preocts/softboiled/actions/workflows/python-tests.yml/badge.svg?branch=main)](https://github.com/Preocts/softboiled/actions/workflows/python-tests.yml)
+[![codecov](https://codecov.io/gh/Preocts/softboiled/branch/main/graph/badge.svg?token=QY7R84TE9D)](https://codecov.io/gh/Preocts/softboiled)
 
 # SoftBoiled - Making overly flexible dataclasses
 
