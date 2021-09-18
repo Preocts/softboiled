@@ -11,6 +11,7 @@ import dataclasses
 import functools
 import logging
 import re
+from dataclasses import is_dataclass
 from dataclasses import MISSING
 from typing import Any
 from typing import Dict
@@ -25,6 +26,9 @@ class SoftBoiled:
 
     def __init__(self, cls: Type[Any]) -> None:
         """Wraps a dataclasses.dataclass and registers class name internally"""
+        if not is_dataclass(cls):
+            raise ValueError("Expected dataclass obejct, got %s", type(cls))
+
         self.cls = cls
 
         SoftBoiled.platter.update({cls.__name__: cls})
