@@ -9,6 +9,7 @@ from typing import Dict
 from typing import List
 from typing import Optional
 
+import pytest
 from softboiled import SoftBoiled
 
 INNER_NEST_SMALL: Dict[str, Any] = {"data01": "Hi"}
@@ -82,6 +83,15 @@ class DefaultValues:
     data01: str = DEFAULT_EXPECTED["data01"]
     data02: bool = DEFAULT_EXPECTED["data02"]
     data03: int = DEFAULT_EXPECTED["data03"]
+
+
+def test_not_a_dataclass() -> None:
+    """We don't serve your kind here (EAFP)"""
+    with pytest.raises(ValueError):
+
+        @SoftBoiled
+        class NotADataClass:
+            ...
 
 
 def test_registered() -> None:
