@@ -33,7 +33,7 @@ py -m pip install git+https://github.com/preocts/softboiled@v1.x.x
 
 ---
 
-## [Example Usage](example/example.py)
+## [Example Usage](examples/example.py)
 
 The documentation says to expect the following API response:
 ```py
