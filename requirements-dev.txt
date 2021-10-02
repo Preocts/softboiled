@@ -24,7 +24,11 @@ filelock==3.2.0
     #   virtualenv
 flake8==3.9.2
     # via -r requirements-dev.in
+<<<<<<< HEAD
 identify==2.3.0
+=======
+identify==2.2.15
+>>>>>>> 3cf8da5638b1e150704476de8fb88905f32eedad
     # via pre-commit
 iniconfig==1.1.1
     # via pytest
@@ -68,7 +72,11 @@ pytest==6.2.5
     # via -r requirements-dev.in
 pyyaml==5.4.1
     # via pre-commit
+<<<<<<< HEAD
 regex==2021.9.30
+=======
+regex==2021.9.24
+>>>>>>> 3cf8da5638b1e150704476de8fb88905f32eedad
     # via black
 six==1.16.0
     # via
