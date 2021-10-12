@@ -12,23 +12,19 @@ black==21.9b0
     # via -r requirements-dev.in
 cfgv==3.3.1
     # via pre-commit
-click==8.0.1
+click==8.0.3
     # via black
-coverage==5.5
+coverage==6.0.2
     # via -r requirements-dev.in
 distlib==0.3.3
     # via virtualenv
-filelock==3.2.0
+filelock==3.3.0
     # via
     #   tox
     #   virtualenv
-flake8==3.9.2
+flake8==4.0.1
     # via -r requirements-dev.in
-<<<<<<< HEAD
 identify==2.3.0
-=======
-identify==2.2.15
->>>>>>> 3cf8da5638b1e150704476de8fb88905f32eedad
     # via pre-commit
 iniconfig==1.1.1
     # via pytest
@@ -62,9 +58,9 @@ py==1.10.0
     # via
     #   pytest
     #   tox
-pycodestyle==2.7.0
+pycodestyle==2.8.0
     # via flake8
-pyflakes==2.3.1
+pyflakes==2.4.0
     # via flake8
 pyparsing==2.4.7
     # via packaging
@@ -72,11 +68,7 @@ pytest==6.2.5
     # via -r requirements-dev.in
 pyyaml==5.4.1
     # via pre-commit
-<<<<<<< HEAD
-regex==2021.9.30
-=======
-regex==2021.9.24
->>>>>>> 3cf8da5638b1e150704476de8fb88905f32eedad
+regex==2021.10.8
     # via black
 six==1.16.0
     # via
