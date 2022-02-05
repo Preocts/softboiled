@@ -109,7 +109,7 @@ class SoftBoiled:
 
             for softboiled in SoftBoiled.platter:
                 # Find the SoftBoiled class name in the type string
-                match = re.findall(fr"\b{softboiled}\b", str(fields[key].type))
+                match = re.findall(rf"\b{softboiled}\b", str(fields[key].type))
 
                 if match:
 
